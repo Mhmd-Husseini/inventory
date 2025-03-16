@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\API\BaseController;
 use App\Models\ProductType;
+use App\Services\S3Service;
 use App\Traits\PaginatedResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductTypeController extends BaseController
 {
@@ -19,6 +22,23 @@ class ProductTypeController extends BaseController
      * @var int
      */
     protected $perPage = 15;
+    
+    /**
+     * The S3 service instance.
+     *
+     * @var S3Service
+     */
+    protected $s3Service;
+    
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct(S3Service $s3Service)
+    {
+        $this->s3Service = $s3Service;
+    }
 
     /**
      * Display a listing of the resource.
@@ -65,8 +85,23 @@ class ProductTypeController extends BaseController
         ];
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('product_types', 'public');
-            $data['image_path'] = $path;
+            try {
+                $file = $request->file('image');
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'product_types/' . Str::uuid() . '.' . $extension;
+                
+                $path = $this->s3Service->upload($file, $filename);
+                
+                if (!$path) {
+                    return $this->errorResponse('Failed to upload image to S3', 500);
+                }
+                
+                $data['image_path'] = $path;
+                
+            } catch (\Exception $e) {
+                Log::error('S3 upload error: ' . $e->getMessage());
+                return $this->errorResponse('Error uploading to S3: ' . $e->getMessage(), 500);
+            }
         }
 
         $productType = ProductType::create($data);
@@ -115,12 +150,31 @@ class ProductTypeController extends BaseController
         ];
 
         if ($request->hasFile('image')) {
-            if ($productType->image_path) {
-                Storage::disk('public')->delete($productType->image_path);
+            try {
+                // Delete old image if exists
+                if ($productType->image_path) {
+                    $this->s3Service->delete($productType->image_path);
+                }
+                
+                // Generate a unique filename with original extension
+                $file = $request->file('image');
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'product_types/' . Str::uuid() . '.' . $extension;
+                
+                // Upload to S3 using our custom service
+                $path = $this->s3Service->upload($file, $filename);
+                
+                if (!$path) {
+                    return $this->errorResponse('Failed to upload image to S3', 500);
+                }
+                
+                // Store the file path
+                $data['image_path'] = $path;
+                
+            } catch (\Exception $e) {
+                Log::error('S3 upload error: ' . $e->getMessage());
+                return $this->errorResponse('Error uploading to S3: ' . $e->getMessage(), 500);
             }
-            
-            $path = $request->file('image')->store('product_types', 'public');
-            $data['image_path'] = $path;
         }
 
         $productType->update($data);
@@ -137,8 +191,9 @@ class ProductTypeController extends BaseController
             return $response;
         }
 
+        // Delete image from S3 if exists
         if ($productType->image_path) {
-            Storage::disk('public')->delete($productType->image_path);
+            $this->s3Service->delete($productType->image_path);
         }
 
         $productType->delete();

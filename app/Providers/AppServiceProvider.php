@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Response;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,5 +33,12 @@ class AppServiceProvider extends ServiceProvider
             $connection->statement('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
             return $connection;
         });
+
+        Response::macro('jsonUnescaped', function ($data, $status = 200, array $headers = [], $options = 0) {
+            $options = JSON_UNESCAPED_SLASHES | $options;
+            return Response::json($data, $status, $headers, $options);
+        });
+        
+        JsonResource::withoutWrapping();
     }
 }

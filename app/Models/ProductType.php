@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use App\Services\S3Service;
 
 class ProductType extends Model
 {
@@ -21,6 +23,28 @@ class ProductType extends Model
         'current_stocks',
         'image_path',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['image_url'];
+
+    /**
+     * Get the image URL attribute.
+     *
+     * @return string|null
+     */
+    public function getImageUrlAttribute()
+    {
+        if ($this->image_path) {
+            $s3Service = app()->make(S3Service::class);
+            return $s3Service->getUrl($this->image_path);
+        }
+        
+        return null;
+    }
 
     /**
      * Get the user that owns the product type.

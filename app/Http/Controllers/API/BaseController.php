@@ -34,7 +34,7 @@ class BaseController extends Controller
      */
     protected function successResponse($data, string $message = 'Success', int $code = 200): JsonResponse
     {
-        return response()->json([
+        return response()->jsonUnescaped([
             'success' => true,
             'message' => $message,
             'data' => $data,
@@ -50,7 +50,7 @@ class BaseController extends Controller
      */
     protected function errorResponse(string $message, int $code = 400): JsonResponse
     {
-        return response()->json([
+        return response()->jsonUnescaped([
             'success' => false,
             'message' => $message,
         ], $code);
