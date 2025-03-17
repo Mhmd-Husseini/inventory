@@ -1,66 +1,357 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inventory Management API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a Laravel 11 API for inventory management with JWT authentication using cookies.
 
-## About Laravel
+## Setup
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. Clone the repository
+2. Install dependencies:
+   ```
+   composer install
+   ```
+3. Copy `.env.example` to `.env` and configure your database
+4. Generate application key:
+   ```
+   php artisan key:generate
+   ```
+5. Generate JWT secret:
+   ```
+   php artisan jwt:secret
+   ```
+6. Run migrations:
+   ```
+   php artisan migrate
+   ```
+7. Start the server:
+   ```
+   php artisan serve
+   ```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## API Endpoints
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Authentication
 
-## Learning Laravel
+#### Register
+- **URL**: `/api/auth/register`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "access_token": "token",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "created_at": "2023-01-01T00:00:00.000000Z",
+      "updated_at": "2023-01-01T00:00:00.000000Z"
+    }
+  }
+  ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+#### Login
+- **URL**: `/api/auth/login`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "access_token": "token",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "created_at": "2023-01-01T00:00:00.000000Z",
+      "updated_at": "2023-01-01T00:00:00.000000Z"
+    }
+  }
+  ```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+#### Logout
+- **URL**: `/api/auth/logout`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "message": "Successfully logged out"
+  }
+  ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### Get User
+- **URL**: `/api/auth/me`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "email": "user@example.com",
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+  ```
 
-## Laravel Sponsors
+#### Refresh Token
+- **URL**: `/api/auth/refresh`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "access_token": "new_token",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "created_at": "2023-01-01T00:00:00.000000Z",
+      "updated_at": "2023-01-01T00:00:00.000000Z"
+    }
+  }
+  ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Product Types
 
-### Premium Partners
+#### List Product Types
+- **URL**: `/api/product-types`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "user_id": 1,
+      "name": "Product Type 1",
+      "description": "Description",
+      "current_stocks": 10,
+      "image_path": "product_types/image.jpg",
+      "created_at": "2023-01-01T00:00:00.000000Z",
+      "updated_at": "2023-01-01T00:00:00.000000Z"
+    }
+  ]
+  ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+#### Create Product Type
+- **URL**: `/api/product-types`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body**:
+  ```json
+  {
+    "name": "Product Type 1",
+    "description": "Description",
+    "current_stocks": 10,
+    "image": "file"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "user_id": 1,
+    "name": "Product Type 1",
+    "description": "Description",
+    "current_stocks": 10,
+    "image_path": "product_types/image.jpg",
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+  ```
 
-## Contributing
+#### Get Product Type
+- **URL**: `/api/product-types/{id}`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "user_id": 1,
+    "name": "Product Type 1",
+    "description": "Description",
+    "current_stocks": 10,
+    "image_path": "product_types/image.jpg",
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+  ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Update Product Type
+- **URL**: `/api/product-types/{id}`
+- **Method**: `PUT`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body**:
+  ```json
+  {
+    "name": "Updated Product Type",
+    "description": "Updated Description",
+    "current_stocks": 20,
+    "image": "file"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "user_id": 1,
+    "name": "Updated Product Type",
+    "description": "Updated Description",
+    "current_stocks": 20,
+    "image_path": "product_types/new_image.jpg",
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+  ```
 
-## Code of Conduct
+#### Delete Product Type
+- **URL**: `/api/product-types/{id}`
+- **Method**: `DELETE`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "message": "Product type deleted successfully"
+  }
+  ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Items
 
-## Security Vulnerabilities
+#### List Items
+- **URL**: `/api/items?product_type_id={product_type_id}`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "product_type_id": 1,
+      "serial_number": "SN12345",
+      "is_sold": false,
+      "created_at": "2023-01-01T00:00:00.000000Z",
+      "updated_at": "2023-01-01T00:00:00.000000Z"
+    }
+  ]
+  ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+#### Create Item
+- **URL**: `/api/items`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body**:
+  ```json
+  {
+    "product_type_id": 1,
+    "serial_number": "SN12345",
+    "is_sold": false
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "product_type_id": 1,
+    "serial_number": "SN12345",
+    "is_sold": false,
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+  ```
 
-## License
+#### Get Item
+- **URL**: `/api/items/{id}`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "product_type_id": 1,
+    "serial_number": "SN12345",
+    "is_sold": false,
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+  ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+#### Update Item
+- **URL**: `/api/items/{id}`
+- **Method**: `PUT`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body**:
+  ```json
+  {
+    "serial_number": "SN67890",
+    "is_sold": true
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": 1,
+    "product_type_id": 1,
+    "serial_number": "SN67890",
+    "is_sold": true,
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+  ```
+
+#### Delete Item
+- **URL**: `/api/items/{id}`
+- **Method**: `DELETE`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "message": "Item deleted successfully"
+  }
+  ```
+
+## JWT Cookie Authentication
+
+This API uses JWT tokens stored in cookies for authentication. The token is automatically included in the cookie when you login or register, and is automatically sent with each request. The token is also automatically refreshed when needed.
+
+## Database Schema
+
+### Users
+- `id` - bigint, unsigned, auto increment, primary key
+- `name` - varchar(255)
+- `email` - varchar(255), unique
+- `password` - varchar(255)
+- `created_at` - timestamp, nullable, default CURRENT_TIMESTAMP
+- `updated_at` - timestamp, nullable, default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+### Product Types
+- `id` - bigint, unsigned, auto increment, primary key
+- `user_id` - bigint, unsigned, foreign key references users(id) ON DELETE CASCADE
+- `name` - varchar(255)
+- `description` - text, nullable
+- `current_stocks` - integer, default 0
+- `image_path` - varchar(255), nullable
+- `created_at` - timestamp, nullable, default CURRENT_TIMESTAMP
+- `updated_at` - timestamp, nullable, default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+### Items
+- `id` - bigint, unsigned, auto increment, primary key
+- `product_type_id` - bigint, unsigned, foreign key references product_types(id) ON DELETE CASCADE
+- `serial_number` - varchar(255), unique
+- `is_sold` - tinyint(1), default 0
+- `created_at` - timestamp, nullable, default CURRENT_TIMESTAMP
+- `updated_at` - timestamp, nullable, default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
